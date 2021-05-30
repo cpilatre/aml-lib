@@ -1,13 +1,66 @@
-use crate::{seconds_to_utc, valid_list, AmlError, SmsDataV1, SmsDataV2};
-use chrono::{DateTime, LocalResult, NaiveDateTime, TimeZone, Utc};
 use std::collections::HashMap;
+use chrono::{DateTime, LocalResult, NaiveDateTime, TimeZone, Utc};
+use crate::{seconds_to_utc, valid_list, AmlError};
 
 const DATETIME_FORMAT: &str = "%Y%m%d%H%M%S";
 
-#[derive(Debug)]
-pub enum SmsData {
-    V1(SmsDataV1),
-    V2(SmsDataV2),
+#[derive(Debug, Default)]
+pub struct  SmsData {
+    /// The header shall appear at the beginning of the SMS message.
+    pub header: Option<String>,
+
+    pub emergency_number: Option<String>,
+
+    pub beginning_of_call: Option<DateTime<Utc>>,
+
+    /// The WGS84 latitude.
+    pub latitude: Option<f64>,
+
+    /// The WGS84 longitude.
+    pub longitude: Option<f64>,
+
+    /// (v1) The radius of the location area in metres.
+    pub radius: Option<f64>,
+// TODO: check radius vs accuracy
+    /// The radius of the location area in metres.
+    pub accuracy: Option<f64>,
+
+    /// The date and time that the handset determined the location area specified in UTC (Greenwich).
+    pub time_of_positioning: Option<DateTime<Utc>>,
+
+    /// The Level of Confidence is a percentage probability that the mobile handset is within the area being communicated.
+    pub level_of_confidence: Option<f64>,
+
+    pub altitude: Option<f64>,
+
+    pub vertical_accuracy: Option<f64>,
+
+    /// The method used to determine the location area.
+    pub positioning_method: Option<String>,
+
+    /// (v1) The SIM card identifier of the handset that has made the emergency call.
+    pub imsi: Option<String>,
+
+    /// The identifier of the handset that made the emergency call.
+    pub imei: Option<String>,
+
+    /// Mobile Country Code, used to determine the network country that the emergency call was made on.
+    pub network_mcc: Option<String>,
+
+    /// Mobile Network Code, used to determine the mobile network used to make the emergency call.
+    pub network_mnc: Option<String>,
+
+    /// Home mobile Country Code,
+    pub home_mcc: Option<String>,
+
+    /// Home mobile Network Code,
+    pub home_mnc: Option<String>,
+
+    /// Language tags (IETF BCP 47)
+    pub language: Option<String>,
+
+    /// (v1) The length of the entire SMS message including the header and the length attribute.
+    pub message_length: Option<usize>,    
 }
 
 impl SmsData {
@@ -56,88 +109,88 @@ impl SmsData {
     }
 
     fn from_text_v1(properties: HashMap<&str, &str>) -> Self {
-        let mut sms_v1: SmsDataV1 = Default::default();
+        let mut sms: SmsData = Default::default();
 
         for (key, value) in properties {
             match (key, value) {
-                (r#"A"ML"#, _) => sms_v1.header = Some(value.to_string()),
-                ("lg", _) => sms_v1.longitude = value.parse::<f64>().ok(),
-                ("lt", _) => sms_v1.latitude = value.parse::<f64>().ok(),
-                ("rd", _) => sms_v1.radius = value.parse::<f64>().ok(),
+                (r#"A"ML"#, _) => sms.header = Some(value.to_string()),
+                ("lg", _) => sms.longitude = value.parse::<f64>().ok(),
+                ("lt", _) => sms.latitude = value.parse::<f64>().ok(),
+                ("rd", _) => sms.radius = value.parse::<f64>().ok(),
                 ("top", _) => {
                     if let Ok(ndt) = NaiveDateTime::parse_from_str(&value, DATETIME_FORMAT) {
-                        sms_v1.time_of_positioning = Some(DateTime::<Utc>::from_utc(ndt, Utc));
+                        sms.time_of_positioning = Some(DateTime::<Utc>::from_utc(ndt, Utc));
                     }
                 }
-                ("lc", _) => sms_v1.level_of_confidence = value.parse::<f64>().ok(),
+                ("lc", _) => sms.level_of_confidence = value.parse::<f64>().ok(),
                 ("pm", _) => {
-                    sms_v1.positioning_method =
+                    sms.positioning_method =
                         valid_list!(value.to_uppercase(), "G", "W", "C", "U")
                 }
-                ("si", _) => sms_v1.imsi = Some(value.to_string()),
-                ("ei", _) => sms_v1.imei = Some(value.to_string()),
-                ("mcc", _) => sms_v1.network_mcc = Some(value.to_string()),
-                ("mnc", _) => sms_v1.network_mnc = Some(value.to_string()),
-                ("ml", _) => sms_v1.message_length = value.parse::<usize>().ok(),
+                ("si", _) => sms.imsi = Some(value.to_string()),
+                ("ei", _) => sms.imei = Some(value.to_string()),
+                ("mcc", _) => sms.network_mcc = Some(value.to_string()),
+                ("mnc", _) => sms.network_mnc = Some(value.to_string()),
+                ("ml", _) => sms.message_length = value.parse::<usize>().ok(),
                 (_, _) => (),
             }
         }
 
-        Self::V1(sms_v1)
+        sms
     }
 
     fn from_text_v2(properties: HashMap<&str, &str>) -> Self {
-        let mut sms_v2: SmsDataV2 = Default::default();
+        let mut sms: SmsData = Default::default();
         let (mut et_opt, mut lt_opt): (Option<i64>, Option<i64>) = Default::default();
 
         for (key, value) in properties {
             match (key, value) {
-                (r#"A"ML"#, _) => sms_v2.header = Some(value.to_string()),
-                ("en", _) => sms_v2.emergency_number = Some(value.to_string()),
+                (r#"A"ML"#, _) => sms.header = Some(value.to_string()),
+                ("en", _) => sms.emergency_number = Some(value.to_string()),
                 ("et", _) => et_opt = value.parse::<i64>().ok(),
                 ("lo", _) => {
                     let mut values: Vec<Option<f64>> =
                         value.split(',').map(|i| i.parse::<f64>().ok()).collect();
                     values.resize(3, None);
-                    sms_v2.latitude = values[0];
-                    sms_v2.longitude = values[1];
-                    sms_v2.accuracy = values[2];
+                    sms.latitude = values[0];
+                    sms.longitude = values[1];
+                    sms.accuracy = values[2];
                 }
                 ("lt", _) => lt_opt = value.parse::<i64>().ok(),
-                ("lc", _) => sms_v2.level_of_confidence = value.parse::<f64>().ok(),
+                ("lc", _) => sms.level_of_confidence = value.parse::<f64>().ok(),
                 ("lz", _) => {
                     let mut values: Vec<Option<f64>> =
                         value.split(',').map(|i| i.parse::<f64>().ok()).collect();
                     values.resize(2, None);
-                    sms_v2.altitude = values[0];
-                    sms_v2.vertical_accuracy = values[1];
+                    sms.altitude = values[0];
+                    sms.vertical_accuracy = values[1];
                 }
                 ("ls", _) => {
-                    sms_v2.positioning_method =
+                    sms.positioning_method =
                         valid_list!(value.to_uppercase(), "G", "W", "C", "U", "F")
                 }
-                ("ei", _) => sms_v2.imei = Some(value.to_string()),
+                ("ei", _) => sms.imei = Some(value.to_string()),
                 ("nc", _) => {
-                    sms_v2.network_mcc = value.get(..3).map(|s| s.to_string());
-                    sms_v2.network_mnc = value.get(3..).map(|s| s.to_string());
+                    sms.network_mcc = value.get(..3).map(|s| s.to_string());
+                    sms.network_mnc = value.get(3..).map(|s| s.to_string());
                 }
                 ("hc", _) => {
-                    sms_v2.home_mcc = value.get(..3).map(|s| s.to_string());
-                    sms_v2.home_mnc = value.get(3..).map(|s| s.to_string());
+                    sms.home_mcc = value.get(..3).map(|s| s.to_string());
+                    sms.home_mnc = value.get(3..).map(|s| s.to_string());
                 }
-                ("lg", _) => sms_v2.language = Some(value.to_string()),
+                ("lg", _) => sms.language = Some(value.to_string()),
                 (_, _) => (),
             }
         }
 
         if let Some(et) = et_opt {
-            sms_v2.beginning_of_call = seconds_to_utc!(et);
+            sms.beginning_of_call = seconds_to_utc!(et);
             if let Some(lt) = lt_opt {
-                sms_v2.time_of_positioning = seconds_to_utc!(et + lt);
+                sms.time_of_positioning = seconds_to_utc!(et + lt);
             }
         }
 
-        Self::V2(sms_v2)
+        sms
     }
 
     fn get_properties(s: &str) -> HashMap<&str, &str> {

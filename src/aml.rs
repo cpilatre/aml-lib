@@ -1,4 +1,4 @@
-use crate::{ AmlError, SmsDataV2, SmsDataV1, HttpsData, SmsData, };
+use crate::{ AmlError, HttpsData, SmsData};
 use chrono::{DateTime, Utc};
 
 #[derive(Debug, Default)]
@@ -39,18 +39,12 @@ impl AmlData {
 
     pub fn from_text_sms<S: AsRef<str>>(text_sms: S) -> Result<Self, AmlError> {
         let sms_data = SmsData::from_text(text_sms)?;
-        match sms_data {
-            SmsData::V1(v1) => Ok(v1.into()),
-            SmsData::V2(v2) => Ok(v2.into()),
-        }
+        Ok(sms_data.into())
     }
 
     pub fn from_data_sms(data_sms: &[u8]) -> Result<Self, AmlError> {
         let sms_data = SmsData::from_data(data_sms)?;
-        match sms_data {
-            SmsData::V1(v1) => Ok(v1.into()),
-            SmsData::V2(v2) => Ok(v2.into()),
-        }
+        Ok(sms_data.into())
     }
 
     pub fn from_base64_sms<S: AsRef<[u8]>>(base64_sms: S)-> Result<Self, AmlError> {
@@ -61,46 +55,27 @@ impl AmlData {
     }
 }
 
-impl From<SmsDataV1> for AmlData {
-    fn from(sms_v1: SmsDataV1) -> Self {
+impl From<SmsData> for AmlData {
+    fn from(sms: SmsData) -> Self {
         AmlData {
-            version: sms_v1.header,
-            latitude: sms_v1.latitude,
-            longitude: sms_v1.longitude,
-            time_of_positioning: sms_v1.time_of_positioning,
-            positioning_method: sms_v1.positioning_method,
-            accuracy: sms_v1.radius,
-            confidence: sms_v1.level_of_confidence,
-            imsi: sms_v1.imsi,
-            imei: sms_v1.imei,
-            network_mcc: sms_v1.network_mcc,
-            network_mnc: sms_v1.network_mnc,
-            transport: "sms".to_string(),
-            ..Default::default()
-        }
-    }
-}
-
-impl From<SmsDataV2> for AmlData {
-    fn from(sms_v2: SmsDataV2) -> Self {
-        AmlData {
-            version: sms_v2.header,
-            emergency_number: sms_v2.emergency_number,
-            beginning_of_call: sms_v2.beginning_of_call,
-            latitude: sms_v2.latitude,
-            longitude: sms_v2.longitude,
-            accuracy: sms_v2.accuracy,
-            time_of_positioning: sms_v2.time_of_positioning,
-            confidence: sms_v2.level_of_confidence,
-            altitude: sms_v2.altitude,
-            vertical_accuracy: sms_v2.vertical_accuracy,
-            positioning_method: sms_v2.positioning_method,
-            imei: sms_v2.imei,
-            network_mcc: sms_v2.network_mcc,
-            network_mnc: sms_v2.network_mnc,
-            home_mcc: sms_v2.home_mcc,
-            home_mnc: sms_v2.home_mnc,
-            language: sms_v2.language,
+            version: sms.header,
+            emergency_number: sms.emergency_number,
+            beginning_of_call: sms.beginning_of_call,
+            latitude: sms.latitude,
+            longitude: sms.longitude,
+            accuracy: sms.accuracy,
+            time_of_positioning: sms.time_of_positioning,
+            confidence: sms.level_of_confidence,
+            altitude: sms.altitude,
+            vertical_accuracy: sms.vertical_accuracy,
+            positioning_method: sms.positioning_method,
+            imsi: sms.imsi,
+            imei: sms.imei,
+            network_mcc: sms.network_mcc,
+            network_mnc: sms.network_mnc,
+            home_mcc: sms.home_mcc,
+            home_mnc: sms.home_mnc,
+            language: sms.language,
             transport: "sms".to_string(),
             ..Default::default()
         }
