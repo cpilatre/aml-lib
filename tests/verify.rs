@@ -1,4 +1,4 @@
-use amlib::{AmlData, SmsData};
+use aml_lib::{AmlData, SmsData};
 
 #[test]
 fn from_text_sms() {
