@@ -2,6 +2,7 @@ mod aml;
 mod https;
 mod sms;
 mod tools;
+mod hmac;
 
 pub use aml::AmlData;
 pub use https::HttpsData;

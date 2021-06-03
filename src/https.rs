@@ -1,6 +1,8 @@
-use crate::{millis_to_utc, valid_list};
-use chrono::{Date, DateTime, LocalResult, TimeZone, Utc};
 use std::borrow::Cow;
+use chrono::{ DateTime, LocalResult, TimeZone, Utc };
+use crate::{ millis_to_utc, valid_list, hmac::hmac_sha1 };
+
+const HMAC_FIELD: &str = "hmac";
 
 #[derive(Debug, Default)]
 pub struct HttpsData {
@@ -19,7 +21,7 @@ pub struct HttpsData {
     /// Date and time of the beginning of call (UTC format).
     pub time: Option<DateTime<Utc>>,
 
-    /// Ground truth latitude* (for testing).
+    /// Ground truth latitude (for testing).
     pub gt_location_latitude: Option<f64>,
 
     /// Ground truth longitude* (for testing).
@@ -40,10 +42,8 @@ pub struct HttpsData {
     /// Floor label (as in elevator button floor label - may be non-numeric).
     pub location_floor: Option<f64>,
 
-    /**
-        The method used to determine the location area.
-        One char string valued with wifi, cell, gps or unknown.
-    */
+    /// The method used to determine the location area.
+    /// One char string valued with wifi, cell, gps or unknown.
     pub location_source: Option<String>,
 
     /// Location accuracy in meters.
@@ -77,7 +77,7 @@ pub struct HttpsData {
     pub device_iccid: Option<String>,
 
     /// Home Mobile Country Code.
-      pub cell_home_mcc: Option<String>,
+    pub cell_home_mcc: Option<String>,
 
     /// Home mobile Network Code.
     pub cell_home_mnc: Option<String>,
@@ -99,6 +99,31 @@ pub struct HttpsData {
 }
 
 impl HttpsData {
+    /// Verify the `hmac` field to authenticate the message.
+    /// Assumes that HMAC is the last of the fields.
+    ///
+    /// ```
+    /// use aml_lib::HttpsData;
+    ///
+    /// let https = String::from(r#"v=1&device_number=%2B33611223344&location_latitude=0.85732&location_longitude=-4.26325&location_time=1604912121000&location_accuracy=10.4&location_source=GPS&location_certainty=83&hmac=f64c70eb238bb239e00e8ac8c023bf2b5d3c41dd"#);
+    /// if HttpsData::is_authenticated(&https, "AML".as_bytes()) {
+    ///     let data = HttpsData::from_urlencoded(&https);
+    ///     /* Do something */
+    /// }
+    /// ```
+    pub fn is_authenticated<S: AsRef<str>>(payload: S, key: &[u8]) -> bool {
+        let splitted: Vec<&str> = payload.as_ref().split(&format!("&{}=", HMAC_FIELD)).collect();
+
+        if splitted.len() != 2 { 
+            return false; 
+        }
+
+        let message = splitted[0];
+        let hmac = hex::encode(hmac_sha1(key, message.as_bytes()));
+
+        hmac.eq(splitted[1])
+    }
+
     pub fn from_urlencoded<S: AsRef<str>>(payload: S) -> Self {
         let mut https_data: HttpsData = Default::default();
 

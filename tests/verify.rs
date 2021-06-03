@@ -1,4 +1,4 @@
-use aml_lib::{AmlData, SmsData};
+use aml_lib::{AmlData, SmsData, HttpsData};
 
 #[test]
 fn from_text_sms() {
@@ -69,4 +69,11 @@ fn from_https() {
         "Parsing failed : {:?}",
         aml
     );
+}
+
+#[test]
+fn authenticate() {
+    let https = String::from(r#"v=1&device_number=%2B33611223344&location_latitude=0.85732&location_longitude=-4.26325&location_time=1604912121000&location_accuracy=10.4&location_source=GPS&location_certainty=83&hmac=f64c70eb238bb239e00e8ac8c023bf2b5d3c41dd"#);
+
+    assert!(HttpsData::is_authenticated(https, "AML".as_bytes()));
 }

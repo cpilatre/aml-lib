@@ -10,6 +10,8 @@ edition = "2018"
 chrono = "0.4.19"
 url = "2.1.1"
 base64 = "0.13.0"
+sha1 = "0.6.0"
+hex = "0.4.3"
 
 [dev-dependencies]
 hex = "0.4.2"

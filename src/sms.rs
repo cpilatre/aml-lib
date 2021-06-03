@@ -25,33 +25,25 @@ pub struct  SmsData {
     /// Accuracy of location in meters. An accuracy of 0 represents unknown.
     pub accuracy: Option<f64>,
 
-    /**
-        The date and time that the handset determined the location area specified in UTC.
-        This field may be ignored if location or beginning of call fields are valued to None.
-    */
+    /// The date and time that the handset determined the location area specified in UTC.
+    /// This field may be ignored if location or beginning of call fields are valued to None.
     pub time_of_positioning: Option<DateTime<Utc>>,
 
     /// The Level of Confidence is a percentage probability that the mobile handset is within the area being communicated.
     pub level_of_confidence: Option<f64>,
 
-    /**
-        Vertical location in meters (truncated to 1 decimal point).
-        This field may be ignored if location field is valued to None.
-    */
+    /// Vertical location in meters (truncated to 1 decimal point).
+    /// This field may be ignored if location field is valued to None.
     pub altitude: Option<f64>,
 
-    /**
-        Vertical accuracy in meters (truncated to 1 decimal point).
-        Accuracy of 0 represents unknown.
-        This field may be ignored if location field is valued to None.
-    */
+    /// Vertical accuracy in meters (truncated to 1 decimal point).
+    /// Accuracy of 0 represents unknown.
+    /// This field may be ignored if location field is valued to None.
     pub vertical_accuracy: Option<f64>,
 
-    /**
-        The method used to determine the location area.
-        One char string valued with "W" (wifi), "C" (cell), "G" (GNSS), "F" (fused) or "U" (unknown).
-        This field may be ignored if location fields are valued to None.
-    */
+    /// The method used to determine the location area.
+    /// One char string valued with "W" (wifi), "C" (cell), "G" (GNSS), "F" (fused) or "U" (unknown).
+    /// This field may be ignored if location fields are valued to None.
     pub positioning_method: Option<String>,
 
     /// The SIM card identifier of the handset that has made the emergency call.
@@ -84,7 +76,9 @@ impl SmsData {
     ///
     /// # Example
     ///
-    /// ```ignore
+    /// ```
+    /// use aml_lib::SmsData;
+    /// 
     /// let input = "415193D98BEDD8F4DEECE6A2C962B7DA8E7DEEB56232990B86A3D9623B39B92783EDE86F784F068BD560B6D80C1683E568B81D7BDCB3E176F076EFB89BA77B39DCCD56A3C966B15D39DD9BD570B2590E56CBC168B21A4DB66B8FC7BD590CB66BBBC73D990DB66BB37B31D90C";
     /// let decoded = hex::decode(input).expect("Decoding failed");
     ///
@@ -106,7 +100,9 @@ impl SmsData {
     ///
     /// # Example
     ///
-    /// ```ignore
+    /// ```
+    /// use aml_lib::SmsData;
+    /// 
     /// let sms_text = String::from(r#"A"ML=1;lt=48.82639;lg=-2.36619;rd=52;top=20191112112928;lc=68;pm=G;si=208201771948415;ei=353472104343540;mcc=208;mnc=20;ml=128"#);
     ///
     /// let sms_data = SmsData::from_text(&sms_text);
