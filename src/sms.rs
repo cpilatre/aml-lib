@@ -7,38 +7,54 @@ const DATETIME_FORMAT: &str = "%Y%m%d%H%M%S";
 #[derive(Debug, Default)]
 pub struct  SmsData {
     /// The header shall appear at the beginning of the SMS message.
+    /// This is the version of AML.
     pub header: Option<String>,
 
+    /// The emergency number dialed (i.e. 112, 911, ...).
     pub emergency_number: Option<String>,
 
+    /// The beginning of the emergency call (UTC).
     pub beginning_of_call: Option<DateTime<Utc>>,
 
-    /// The WGS84 latitude.
+    /// The WGS84 latitude in degrees. Latitude is truncated to 5 decimal points.
     pub latitude: Option<f64>,
 
-    /// The WGS84 longitude.
+    /// The WGS84 longitude in degrees. Longitude is truncated to 5 decimal points.
     pub longitude: Option<f64>,
 
-    /// (v1) The radius of the location area in metres.
-    pub radius: Option<f64>,
-// TODO: check radius vs accuracy
-    /// The radius of the location area in metres.
+    /// Accuracy of location in meters. An accuracy of 0 represents unknown.
     pub accuracy: Option<f64>,
 
-    /// The date and time that the handset determined the location area specified in UTC (Greenwich).
+    /**
+        The date and time that the handset determined the location area specified in UTC.
+        This field may be ignored if location or beginning of call fields are valued to None.
+    */
     pub time_of_positioning: Option<DateTime<Utc>>,
 
     /// The Level of Confidence is a percentage probability that the mobile handset is within the area being communicated.
     pub level_of_confidence: Option<f64>,
 
+    /**
+        Vertical location in meters (truncated to 1 decimal point).
+        This field may be ignored if location field is valued to None.
+    */
     pub altitude: Option<f64>,
 
+    /**
+        Vertical accuracy in meters (truncated to 1 decimal point).
+        Accuracy of 0 represents unknown.
+        This field may be ignored if location field is valued to None.
+    */
     pub vertical_accuracy: Option<f64>,
 
-    /// The method used to determine the location area.
+    /**
+        The method used to determine the location area.
+        One char string valued with "W" (wifi), "C" (cell), "G" (GNSS), "F" (fused) or "U" (unknown).
+        This field may be ignored if location fields are valued to None.
+    */
     pub positioning_method: Option<String>,
 
-    /// (v1) The SIM card identifier of the handset that has made the emergency call.
+    /// The SIM card identifier of the handset that has made the emergency call.
     pub imsi: Option<String>,
 
     /// The identifier of the handset that made the emergency call.
@@ -50,13 +66,13 @@ pub struct  SmsData {
     /// Mobile Network Code, used to determine the mobile network used to make the emergency call.
     pub network_mnc: Option<String>,
 
-    /// Home mobile Country Code,
+    /// Home Mobile Country Code.
     pub home_mcc: Option<String>,
 
-    /// Home mobile Network Code,
+    /// Home Mobile Network Code.
     pub home_mnc: Option<String>,
 
-    /// Language tags (IETF BCP 47)
+    /// Language tags (IETF BCP 47).
     pub language: Option<String>,
 
     /// (v1) The length of the entire SMS message including the header and the length attribute.
@@ -64,18 +80,18 @@ pub struct  SmsData {
 }
 
 impl SmsData {
-    /// Parse a SMS data. This method must never fail.
+    /// Parse a SMS data.
     ///
     /// # Example
     ///
     /// ```ignore
-    ///     let input = "415193D98BEDD8F4DEECE6A2C962B7DA8E7DEEB56232990B86A3D9623B39B92783EDE86F784F068BD560B6D80C1683E568B81D7BDCB3E176F076EFB89BA77B39DCCD56A3C966B15D39DD9BD570B2590E56CBC168B21A4DB66B8FC7BD590CB66BBBC73D990DB66BB37B31D90C";
-    ///     let decoded = hex::decode(input).expect("Decoding failed");
+    /// let input = "415193D98BEDD8F4DEECE6A2C962B7DA8E7DEEB56232990B86A3D9623B39B92783EDE86F784F068BD560B6D80C1683E568B81D7BDCB3E176F076EFB89BA77B39DCCD56A3C966B15D39DD9BD570B2590E56CBC168B21A4DB66B8FC7BD590CB66BBBC73D990DB66BB37B31D90C";
+    /// let decoded = hex::decode(input).expect("Decoding failed");
     ///
-    ///     let sms_data = SmsData::from_data(&decoded).unwrap();
-    ///     if let SmsData::V1(sms) = sms_data {
-    ///         assert_eq!(sms.latitude, Some(37.42175));
-    ///     }
+    /// let sms_data = SmsData::from_data(&decoded);
+    /// if let Ok(sms) = sms_data {
+    ///     assert_eq!(sms.latitude, Some(37.42175));
+    /// }
     /// ```
     pub fn from_data(bin_sms: &[u8]) -> Result<Self, AmlError> {
         let raw_sms: Vec<u8>;
@@ -86,17 +102,17 @@ impl SmsData {
         Self::from_text(text_sms)
     }
 
-    /// Parse a SMS text. This method must never fail.
+    /// Parse a SMS text.
     ///
     /// # Example
     ///
     /// ```ignore
-    ///     let sms_text = String::from(r#"A"ML=1;lt=48.82639;lg=-2.36619;rd=52;top=20191112112928;lc=68;pm=G;si=208201771948415;ei=353472104343540;mcc=208;mnc=20;ml=128"#);
+    /// let sms_text = String::from(r#"A"ML=1;lt=48.82639;lg=-2.36619;rd=52;top=20191112112928;lc=68;pm=G;si=208201771948415;ei=353472104343540;mcc=208;mnc=20;ml=128"#);
     ///
-    ///     let sms_data = SmsData::from_text(&sms_text).unwrap();
-    ///     if let SmsData::V1(sms) = sms_data {
-    ///         assert_eq!(sms.latitude, Some(48.82639));
-    ///     }
+    /// let sms_data = SmsData::from_text(&sms_text);
+    /// if let Ok(sms) = sms_data {
+    ///     assert_eq!(sms.latitude, Some(48.82639));
+    /// }
     /// ```
     pub fn from_text<S: AsRef<str>>(text_sms: S) -> Result<Self, AmlError> {
         let properties = Self::get_properties(text_sms.as_ref());
@@ -116,7 +132,7 @@ impl SmsData {
                 (r#"A"ML"#, _) => sms.header = Some(value.to_string()),
                 ("lg", _) => sms.longitude = value.parse::<f64>().ok(),
                 ("lt", _) => sms.latitude = value.parse::<f64>().ok(),
-                ("rd", _) => sms.radius = value.parse::<f64>().ok(),
+                ("rd", _) => sms.accuracy = value.parse::<f64>().ok(),
                 ("top", _) => {
                     if let Ok(ndt) = NaiveDateTime::parse_from_str(&value, DATETIME_FORMAT) {
                         sms.time_of_positioning = Some(DateTime::<Utc>::from_utc(ndt, Utc));
