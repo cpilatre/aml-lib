@@ -42,8 +42,7 @@ pub struct HttpsData {
     /// Floor label (as in elevator button floor label - may be non-numeric).
     pub location_floor: Option<f64>,
 
-    /// The method used to determine the location area.
-    /// One char string valued with wifi, cell, gps or unknown.
+    /// The method used to determine the location area. String valued with `wifi`, `cell`, `gps` or `unknown`.
     pub location_source: Option<String>,
 
     /// Location accuracy in meters.
@@ -88,14 +87,14 @@ pub struct HttpsData {
     /// Mobile Network Code, used to determine the mobile network used to make the emergency call.
     pub cell_network_mnc: Option<String>,
 
-    /// Message Authentification Code
-    pub hmac: Option<String>,
-
     /// BCP 47 language tags (comma separated), in order from highest priority to lowest
     pub device_languages: Option<String>,
 
     /// Car crash date time
-    adr_carcrash_time: Option<DateTime<Utc>>
+    adr_carcrash_time: Option<DateTime<Utc>>,
+
+    /// Message Authentification Code
+    pub hmac: Option<String>,
 }
 
 impl HttpsData {
@@ -104,9 +103,11 @@ impl HttpsData {
     ///
     /// ```
     /// use aml_lib::HttpsData;
+    /// 
+    /// const KEY: &str = "AML";
     ///
     /// let https = String::from(r#"v=1&device_number=%2B33611223344&location_latitude=0.85732&location_longitude=-4.26325&location_time=1604912121000&location_accuracy=10.4&location_source=GPS&location_certainty=83&hmac=f64c70eb238bb239e00e8ac8c023bf2b5d3c41dd"#);
-    /// if HttpsData::is_authenticated(&https, "AML".as_bytes()) {
+    /// if HttpsData::is_authenticated(&https, KEY.as_bytes()) {
     ///     let data = HttpsData::from_urlencoded(&https);
     ///     /* Do something */
     /// }
@@ -124,6 +125,16 @@ impl HttpsData {
         hmac.eq(splitted[1])
     }
 
+    /// Parse a HTTPS AML message. That assumes it is an URL encoded string. 
+    ///
+    /// ```
+    /// use aml_lib::HttpsData;
+    /// 
+    /// let https = String::from(r#"v=1&device_number=%2B33611223344&location_latitude=0.85732&location_longitude=-4.26325&location_time=1604912121000&location_accuracy=10.4&location_source=GPS&location_certainty=83&hmac=f64c70eb238bb239e00e8ac8c023bf2b5d3c41dd"#);
+    /// 
+    /// let https_data = HttpsData::from_urlencoded(&https);
+    /// assert_eq!(https_data.location_latitude, Some(0.85732));
+    /// ```    
     pub fn from_urlencoded<S: AsRef<str>>(payload: S) -> Self {
         let mut https_data: HttpsData = Default::default();
 
@@ -187,6 +198,11 @@ impl HttpsData {
                 ("cell_home_mnc", val) => https_data.cell_home_mnc = Some(val.to_string()),
                 ("cell_network_mcc", val) => https_data.cell_network_mcc = Some(val.to_string()),
                 ("cell_network_mnc", val) => https_data.cell_network_mnc = Some(val.to_string()),
+                
+                ("device_languages", val) => https_data.device_languages = Some(val.to_string()),
+                ("adr_carcrash_time", val) => https_data.adr_carcrash_time = millis_to_utc!(val),
+                ("hmac", val) => https_data.hmac = Some(val.to_string()),
+
                 (_, _) => (),
             }
         }

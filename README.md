@@ -5,24 +5,26 @@
 
 ## About
 
-aml-lib is a 100% Rust library for dealing with AML (Advanced Mobile Location) messages. 
+aml-lib is a 100% Rust library for dealing with AML (Advanced Mobile Location) messages.
 
 ## Main features
 
 - SMS AML v1 and V2 compliance
-- Accept text and data SMS (with binary or Base64 encoded sources) 
+- Accepts text and data SMS (with binary or Base64 encoded sources)
 - HTTPS AML with hmac-sha1 authentification
-- Provides a generic AML format 
+- Provides a generic AML format
 
-## Installation 
+## Installation
 
 Manually add `aml-lib` to your `Cargo.toml` file :
+
 ```toml
 [dependencies]
 aml-lib = "*"
 ```
 
 Or use [cargo-edit](https://crates.io/crates/cargo-edit) :
+
 ```bash
 cargo add aml-lib
 ```

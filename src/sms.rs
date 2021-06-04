@@ -42,7 +42,7 @@ pub struct  SmsData {
     pub vertical_accuracy: Option<f64>,
 
     /// The method used to determine the location area.
-    /// One char string valued with "W" (wifi), "C" (cell), "G" (GNSS), "F" (fused) or "U" (unknown).
+    /// One char string valued with `"W"` (wifi), `"C"` (cell), `"G"` (GNSS), `"F"` (fused) or `"U"` (unknown).
     /// This field may be ignored if location fields are valued to None.
     pub positioning_method: Option<String>,
 
@@ -69,6 +69,10 @@ pub struct  SmsData {
 
     /// (v1) The length of the entire SMS message including the header and the length attribute.
     pub message_length: Option<usize>,    
+
+    /// SMS AML is validated for v1 if message length is equal to message_length.
+    /// For v2, SMS AML is always validated. 
+    pub is_validated: bool,
 }
 
 impl SmsData {
@@ -114,8 +118,19 @@ impl SmsData {
         let properties = Self::get_properties(text_sms.as_ref());
 
         match properties.get(r#"A"ML"#) {
-            Some(&"1") => Ok(Self::from_text_v1(properties)),
-            Some(&"2") => Ok(Self::from_text_v2(properties)),
+            Some(&"1") => {
+                let mut sms_data = Self::from_text_v1(properties);
+                if let Some(len) = sms_data.message_length {
+                    sms_data.is_validated = len == text_sms.as_ref().len();
+                };
+                Ok(sms_data)
+            },
+            Some(&"2") => {
+                let mut sms_data = Self::from_text_v2(properties);
+                // By default AML SMS v2 is validate
+                sms_data.is_validated = true;
+                Ok(sms_data)
+            },
             _ => Err(AmlError::UnimplementedVersion),
         }
     }

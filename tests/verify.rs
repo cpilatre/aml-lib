@@ -3,7 +3,7 @@ use aml_lib::{AmlData, SmsData, HttpsData};
 #[test]
 fn from_text_sms() {
     let sms_text = String::from(
-        r#"A"ML=1;lt=48.82639;lg=-2.36619;rd=52;top=20191112112928;lc=68;pm=G;si=208201771948415;ei=353472104343540;mcc=208;mnc=20;ml=128"#,
+        r#"A"ML=1;lt=48.82639;lg=-2.36619;rd=52;top=20191112112928;lc=68;pm=G;si=208201771948415;ei=353472104343540;mcc=208;mnc=20;ml=126"#,
     );
 
     let sms_data = SmsData::from_text(&sms_text);
@@ -19,6 +19,20 @@ fn from_text_sms() {
         "Parsing failed : {:?}",
         aml
     );
+}
+
+#[test]
+fn sms_is_validate() {
+    let sms_text = String::from(
+        r#"A"ML=1;lt=48.82639;lg=-2.36619;rd=52;top=20191112112928;lc=68;pm=G;si=208201771948415;ei=353472104343540;mcc=208;mnc=20;ml=126"#,
+    );
+
+    let sms_data = SmsData::from_text(&sms_text);
+    if let Ok(sms) = sms_data {
+        assert!(sms.is_validated, "SMS is not valid : {:?}", sms);
+    } else {
+        panic!("Error text SMS");
+    }
 }
 
 #[test]
