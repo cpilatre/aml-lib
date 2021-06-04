@@ -107,7 +107,7 @@ impl SmsData {
     /// ```
     /// use aml_lib::SmsData;
     /// 
-    /// let sms_text = String::from(r#"A"ML=1;lt=48.82639;lg=-2.36619;rd=52;top=20191112112928;lc=68;pm=G;si=208201771948415;ei=353472104343540;mcc=208;mnc=20;ml=128"#);
+    /// let sms_text = String::from(r#"A"ML=1;lt=48.82639;lg=-2.36619;rd=52;top=20191112112928;lc=68;pm=G;si=208201771948415;ei=353472104343540;mcc=208;mnc=20;ml=126"#);
     ///
     /// let sms_data = SmsData::from_text(&sms_text);
     /// if let Ok(sms) = sms_data {
