@@ -96,8 +96,8 @@ impl AmlData {
     }
 
     /// Parse a SMS data. See [`SmsData::from_data`].
-    pub fn from_data_sms(data_sms: &[u8]) -> Result<Self, AmlError> {
-        let sms_data = SmsData::from_data(data_sms)?;
+    pub fn from_data_sms(bin_sms: &[u8]) -> Result<Self, AmlError> {
+        let sms_data = SmsData::from_binary(bin_sms)?;
         Ok(sms_data.into())
     }
 

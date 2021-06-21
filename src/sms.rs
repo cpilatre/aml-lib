@@ -86,12 +86,12 @@ impl SmsData {
     /// let input = "415193D98BEDD8F4DEECE6A2C962B7DA8E7DEEB56232990B86A3D9623B39B92783EDE86F784F068BD560B6D80C1683E568B81D7BDCB3E176F076EFB89BA77B39DCCD56A3C966B15D39DD9BD570B2590E56CBC168B21A4DB66B8FC7BD590CB66BBBC73D990DB66BB37B31D90C";
     /// let decoded = hex::decode(input).expect("Decoding failed");
     ///
-    /// let sms_data = SmsData::from_data(&decoded);
+    /// let sms_data = SmsData::from_binary(&decoded);
     /// if let Ok(sms) = sms_data {
     ///     assert_eq!(sms.latitude, Some(37.42175));
     /// }
     /// ```
-    pub fn from_data(bin_sms: &[u8]) -> Result<Self, AmlError> {
+    pub fn from_binary(bin_sms: &[u8]) -> Result<Self, AmlError> {
         let raw_sms: Vec<u8>;
         let text_sms: &str;
 
