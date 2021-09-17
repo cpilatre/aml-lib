@@ -64,16 +64,16 @@ pub struct AmlData {
     pub iccid: Option<String>,
 
     /// See [`SmsData::home_mcc`] or [`HttpsData::cell_home_mcc`]
-    pub home_mcc: Option<usize>,
+    pub home_mcc: Option<i32>,
 
     /// See [`SmsData::home_mnc`] or [`HttpsData::cell_home_mnc`]
-    pub home_mnc: Option<usize>,
+    pub home_mnc: Option<i32>,
 
     /// See [`SmsData::network_mcc`] or [`HttpsData::cell_network_mcc`]
-    pub network_mcc: Option<usize>,
+    pub network_mcc: Option<i32>,
 
     /// See [`SmsData::network_mnc`] or [`HttpsData::cell_network_mnc`]
-    pub network_mnc: Option<usize>,
+    pub network_mnc: Option<i32>,
 
     /// See [`SmsData::language`] or [`HttpsData::device_languages`]
     pub languages: Option<String>,

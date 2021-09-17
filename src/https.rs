@@ -76,16 +76,16 @@ pub struct HttpsData {
     pub device_iccid: Option<String>,
 
     /// Home Mobile Country Code.
-    pub cell_home_mcc: Option<usize>,
+    pub cell_home_mcc: Option<i32>,
 
     /// Home mobile Network Code.
-    pub cell_home_mnc: Option<usize>,
+    pub cell_home_mnc: Option<i32>,
 
     /// Mobile Country Code, used to determine the network country that the emergency call was made on.
-    pub cell_network_mcc: Option<usize>,
+    pub cell_network_mcc: Option<i32>,
 
     /// Mobile Network Code, used to determine the mobile network used to make the emergency call.
-    pub cell_network_mnc: Option<usize>,
+    pub cell_network_mnc: Option<i32>,
 
     /// BCP 47 language tags (comma separated), in order from highest priority to lowest
     pub device_languages: Option<String>,
@@ -194,10 +194,10 @@ impl HttpsData {
                 ("device_imei", val) => https_data.device_imei = Some(val.to_string()),
                 ("device_iccid", val) => https_data.device_iccid = Some(val.to_string()),
 
-                ("cell_home_mcc", val) => https_data.cell_home_mcc = val.parse::<usize>().ok(),
-                ("cell_home_mnc", val) => https_data.cell_home_mnc = val.parse::<usize>().ok(),
-                ("cell_network_mcc", val) => https_data.cell_network_mcc = val.parse::<usize>().ok(),
-                ("cell_network_mnc", val) => https_data.cell_network_mnc = val.parse::<usize>().ok(),
+                ("cell_home_mcc", val) => https_data.cell_home_mcc = val.parse::<i32>().ok(),
+                ("cell_home_mnc", val) => https_data.cell_home_mnc = val.parse::<i32>().ok(),
+                ("cell_network_mcc", val) => https_data.cell_network_mcc = val.parse::<i32>().ok(),
+                ("cell_network_mnc", val) => https_data.cell_network_mnc = val.parse::<i32>().ok(),
                 
                 ("device_languages", val) => https_data.device_languages = Some(val.to_string()),
                 ("adr_carcrash_time", val) => https_data.adr_carcrash_time = millis_to_utc!(val),

@@ -53,22 +53,22 @@ pub struct  SmsData {
     pub imei: Option<String>,
 
     /// Mobile Country Code, used to determine the network country that the emergency call was made on.
-    pub network_mcc: Option<usize>,
+    pub network_mcc: Option<i32>,
 
     /// Mobile Network Code, used to determine the mobile network used to make the emergency call.
-    pub network_mnc: Option<usize>,
+    pub network_mnc: Option<i32>,
 
     /// Home Mobile Country Code.
-    pub home_mcc: Option<usize>,
+    pub home_mcc: Option<i32>,
 
     /// Home Mobile Network Code.
-    pub home_mnc: Option<usize>,
+    pub home_mnc: Option<i32>,
 
     /// Language tags (IETF BCP 47).
     pub languages: Option<String>,
 
     /// (v1) The length of the entire SMS message including the header and the length attribute.
-    pub message_length: Option<usize>,    
+    pub message_length: Option<i32>,    
 
     /// SMS AML is validated for v1 if message length is equal to message_length.
     /// For v2, SMS AML is always validated. 
@@ -121,7 +121,7 @@ impl SmsData {
             Some(&"1") => {
                 let mut sms_data = Self::from_text_v1(properties);
                 if let Some(len) = sms_data.message_length {
-                    sms_data.is_validated = len == text_sms.as_ref().len();
+                    sms_data.is_validated = len == (text_sms.as_ref().len() as i32);
                 };
                 Ok(sms_data)
             },
@@ -156,9 +156,9 @@ impl SmsData {
                 }
                 ("si", _) => sms.imsi = Some(value.to_string()),
                 ("ei", _) => sms.imei = Some(value.to_string()),
-                ("mcc", _) => sms.network_mcc = value.parse::<usize>().ok(),
-                ("mnc", _) => sms.network_mnc = value.parse::<usize>().ok(), //Some(value.to_string()),
-                ("ml", _) => sms.message_length = value.parse::<usize>().ok(),
+                ("mcc", _) => sms.network_mcc = value.parse::<i32>().ok(),
+                ("mnc", _) => sms.network_mnc = value.parse::<i32>().ok(), 
+                ("ml", _) => sms.message_length = value.parse::<i32>().ok(),
                 (_, _) => (),
             }
         }
@@ -198,12 +198,12 @@ impl SmsData {
                 }
                 ("ei", _) => sms.imei = Some(value.to_string()),
                 ("nc", _) => {
-                    sms.network_mcc = value.get(..3).and_then(|s| s.parse::<usize>().ok());
-                    sms.network_mnc = value.get(3..).and_then(|s| s.parse::<usize>().ok()); 
+                    sms.network_mcc = value.get(..3).and_then(|s| s.parse::<i32>().ok());
+                    sms.network_mnc = value.get(3..).and_then(|s| s.parse::<i32>().ok()); 
                 }
                 ("hc", _) => {
-                    sms.home_mcc = value.get(..3).and_then(|s| s.parse::<usize>().ok());
-                    sms.home_mnc = value.get(3..).and_then(|s| s.parse::<usize>().ok());
+                    sms.home_mcc = value.get(..3).and_then(|s| s.parse::<i32>().ok());
+                    sms.home_mnc = value.get(3..).and_then(|s| s.parse::<i32>().ok());
                 }
                 ("lg", _) => sms.languages = Some(value.to_string()),
                 (_, _) => (),
