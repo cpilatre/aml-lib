@@ -53,16 +53,16 @@ pub struct  SmsData {
     pub imei: Option<String>,
 
     /// Mobile Country Code, used to determine the network country that the emergency call was made on.
-    pub network_mcc: Option<String>,
+    pub network_mcc: Option<usize>,
 
     /// Mobile Network Code, used to determine the mobile network used to make the emergency call.
-    pub network_mnc: Option<String>,
+    pub network_mnc: Option<usize>,
 
     /// Home Mobile Country Code.
-    pub home_mcc: Option<String>,
+    pub home_mcc: Option<usize>,
 
     /// Home Mobile Network Code.
-    pub home_mnc: Option<String>,
+    pub home_mnc: Option<usize>,
 
     /// Language tags (IETF BCP 47).
     pub languages: Option<String>,
@@ -156,8 +156,8 @@ impl SmsData {
                 }
                 ("si", _) => sms.imsi = Some(value.to_string()),
                 ("ei", _) => sms.imei = Some(value.to_string()),
-                ("mcc", _) => sms.network_mcc = Some(value.to_string()),
-                ("mnc", _) => sms.network_mnc = Some(value.to_string()),
+                ("mcc", _) => sms.network_mcc = value.parse::<usize>().ok(),
+                ("mnc", _) => sms.network_mnc = value.parse::<usize>().ok(), //Some(value.to_string()),
                 ("ml", _) => sms.message_length = value.parse::<usize>().ok(),
                 (_, _) => (),
             }
@@ -198,12 +198,12 @@ impl SmsData {
                 }
                 ("ei", _) => sms.imei = Some(value.to_string()),
                 ("nc", _) => {
-                    sms.network_mcc = value.get(..3).map(|s| s.to_string());
-                    sms.network_mnc = value.get(3..).map(|s| s.to_string());
+                    sms.network_mcc = value.get(..3).and_then(|s| s.parse::<usize>().ok());
+                    sms.network_mnc = value.get(3..).and_then(|s| s.parse::<usize>().ok()); 
                 }
                 ("hc", _) => {
-                    sms.home_mcc = value.get(..3).map(|s| s.to_string());
-                    sms.home_mnc = value.get(3..).map(|s| s.to_string());
+                    sms.home_mcc = value.get(..3).and_then(|s| s.parse::<usize>().ok());
+                    sms.home_mnc = value.get(3..).and_then(|s| s.parse::<usize>().ok());
                 }
                 ("lg", _) => sms.languages = Some(value.to_string()),
                 (_, _) => (),
