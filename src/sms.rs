@@ -65,7 +65,7 @@ pub struct  SmsData {
     pub home_mnc: Option<String>,
 
     /// Language tags (IETF BCP 47).
-    pub language: Option<String>,
+    pub languages: Option<String>,
 
     /// (v1) The length of the entire SMS message including the header and the length attribute.
     pub message_length: Option<usize>,    
@@ -205,7 +205,7 @@ impl SmsData {
                     sms.home_mcc = value.get(..3).map(|s| s.to_string());
                     sms.home_mnc = value.get(3..).map(|s| s.to_string());
                 }
-                ("lg", _) => sms.language = Some(value.to_string()),
+                ("lg", _) => sms.languages = Some(value.to_string()),
                 (_, _) => (),
             }
         }

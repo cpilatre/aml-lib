@@ -76,7 +76,7 @@ pub struct AmlData {
     pub network_mnc: Option<String>,
 
     /// See [`SmsData::language`] or [`HttpsData::device_languages`]
-    pub language: Option<String>,
+    pub languages: Option<String>,
 
     /// Where the location comes from: `sms` or `https`
     pub transport: String,
@@ -130,7 +130,7 @@ impl From<SmsData> for AmlData {
             network_mnc: sms.network_mnc,
             home_mcc: sms.home_mcc,
             home_mnc: sms.home_mnc,
-            language: sms.language,
+            languages: sms.languages,
             transport: "sms".to_string(),
             ..Default::default()
         }
@@ -164,7 +164,7 @@ impl From<HttpsData> for AmlData {
             home_mnc: https_data.cell_home_mnc,
             network_mcc: https_data.cell_network_mcc,
             network_mnc: https_data.cell_network_mnc,
-            language: https_data.device_languages,
+            languages: https_data.device_languages,
             transport: "https".to_string(),
             ..Default::default()
         }
