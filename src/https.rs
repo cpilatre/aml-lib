@@ -91,7 +91,7 @@ pub struct HttpsData {
     pub device_languages: Option<String>,
 
     /// Car crash date time
-    adr_carcrash_time: Option<DateTime<Utc>>,
+    pub adr_carcrash_time: Option<DateTime<Utc>>,
 
     /// Message Authentification Code
     pub hmac: Option<String>,
