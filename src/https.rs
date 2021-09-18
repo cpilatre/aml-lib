@@ -40,7 +40,7 @@ pub struct HttpsData {
     pub location_altitude: Option<f64>,
 
     /// Floor label (as in elevator button floor label - may be non-numeric).
-    pub location_floor: Option<f64>,
+    pub location_floor: Option<String>,
 
     /// The method used to determine the location area. String valued with `wifi`, `cell`, `gps` or `unknown`.
     pub location_source: Option<String>,
@@ -171,6 +171,9 @@ impl HttpsData {
                 ("location_time", val) => https_data.location_time = millis_to_utc!(val),
                 ("location_altitude", val) => {
                     https_data.location_altitude = val.parse::<f64>().ok()
+                }
+                ("location_floor", val) => {
+                    https_data.location_floor = Some(val.to_string())
                 }
                 ("location_source", val) => {
                     https_data.location_source =

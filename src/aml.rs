@@ -28,7 +28,7 @@ pub struct AmlData {
     pub altitude: Option<f64>,
 
     /// See [`HttpsData::location_floor`]
-    pub floor: Option<f64>,
+    pub floor: Option<String>,
 
     /// See [`SmsData::positioning_method`] or [`HttpsData::location_source`]
     pub positioning_method: Option<String>,
