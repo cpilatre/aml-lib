@@ -1,5 +1,5 @@
-use crate::{ AmlError, HttpsData, SmsData};
-use chrono::{ DateTime, Utc };
+use crate::{seconds_to_utc, millis_to_utc, AmlError, HttpsData, SmsData};
+use chrono::{DateTime, Utc, LocalResult, TimeZone,};
 
 #[derive(Debug, Default)]
 pub struct AmlData {
@@ -115,7 +115,7 @@ impl From<SmsData> for AmlData {
         AmlData {
             version: sms.header,
             emergency_number: sms.emergency_number,
-            beginning_of_call: sms.beginning_of_call,
+            beginning_of_call: sms.beginning_of_call.and_then(|et| seconds_to_utc!(et)),
             latitude: sms.latitude,
             longitude: sms.longitude,
             accuracy: sms.accuracy,
@@ -143,7 +143,7 @@ impl From<HttpsData> for AmlData {
             version: https_data.v,
             emergency_number: https_data.emergency_number,
             source_of_activation: https_data.source,
-            beginning_of_call: https_data.time,
+            beginning_of_call: https_data.time.and_then(|et| millis_to_utc!(et)),
             latitude: https_data.location_latitude,
             longitude: https_data.location_longitude,
             time_of_positioning: https_data.location_time,

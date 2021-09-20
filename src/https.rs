@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use chrono::{ DateTime, LocalResult, TimeZone, Utc };
-use crate::{ millis_to_utc, valid_list, hmac::hmac_sha1 };
+use crate::{char_millis_to_utc, valid_list, hmac::hmac_sha1 };
 
 const HMAC_FIELD: &str = "hmac";
 
@@ -18,8 +18,8 @@ pub struct HttpsData {
     /// Version number for thunderbird module.
     pub thunderbird_version: Option<String>,
 
-    /// Date and time of the beginning of call (UTC format).
-    pub time: Option<DateTime<Utc>>,
+    /// Time of the beginning of call (ms unix time).
+    pub time: Option<i64>,
 
     /// Ground truth latitude (for testing).
     pub gt_location_latitude: Option<f64>,
@@ -153,7 +153,7 @@ impl HttpsData {
                 ("thunderbird_version", val) => {
                     https_data.thunderbird_version = Some(val.to_string())
                 }
-                ("time", val) => https_data.time = millis_to_utc!(val),
+                ("time", val) => https_data.time = val.parse::<i64>().ok(),
 
                 ("gt_location_latitude", val) => {
                     https_data.gt_location_latitude = val.parse::<f64>().ok()
@@ -168,7 +168,7 @@ impl HttpsData {
                 ("location_longitude", val) => {
                     https_data.location_longitude = val.parse::<f64>().ok()
                 }
-                ("location_time", val) => https_data.location_time = millis_to_utc!(val),
+                ("location_time", val) => https_data.location_time = char_millis_to_utc!(val),
                 ("location_altitude", val) => {
                     https_data.location_altitude = val.parse::<f64>().ok()
                 }
@@ -177,7 +177,7 @@ impl HttpsData {
                 }
                 ("location_source", val) => {
                     https_data.location_source =
-                        valid_list!(val.to_lowercase(), "gps", "wifi", "cell", "unknown")
+                        valid_list!(val.to_lowercase(), "gps", "wifi", "cell", "fused", "unknown")
                 }
                 ("location_accuracy", val) => {
                     https_data.location_accuracy = val.parse::<f64>().ok()
@@ -203,7 +203,7 @@ impl HttpsData {
                 ("cell_network_mnc", val) => https_data.cell_network_mnc = val.parse::<i32>().ok(),
                 
                 ("device_languages", val) => https_data.device_languages = Some(val.to_string()),
-                ("adr_carcrash_time", val) => https_data.adr_carcrash_time = millis_to_utc!(val),
+                ("adr_carcrash_time", val) => https_data.adr_carcrash_time = char_millis_to_utc!(val),
                 ("hmac", val) => https_data.hmac = Some(val.to_string()),
 
                 (_, _) => (),

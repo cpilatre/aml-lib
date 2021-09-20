@@ -13,8 +13,8 @@ pub struct  SmsData {
     /// The emergency number dialed (i.e. 112, 911, ...).
     pub emergency_number: Option<String>,
 
-    /// The beginning of the emergency call (UTC).
-    pub beginning_of_call: Option<DateTime<Utc>>,
+    /// The beginning of the emergency call (epoch time in seconds).
+    pub beginning_of_call: Option<i64>,
 
     /// The WGS84 latitude in degrees. Latitude is truncated to 5 decimal points.
     pub latitude: Option<f64>,
@@ -211,7 +211,7 @@ impl SmsData {
         }
 
         if let Some(et) = et_opt {
-            sms.beginning_of_call = seconds_to_utc!(et);
+            sms.beginning_of_call = Some(et); //seconds_to_utc!(et);
             if let Some(lt) = lt_opt {
                 sms.time_of_positioning = seconds_to_utc!(et + lt);
             }
